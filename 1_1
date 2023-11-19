@@ -1,0 +1,80 @@
+import re 
+
+class Field:
+    def __init__(self, value=None):
+        self.value = value
+
+class Name(Field):
+    pass
+
+class Phone(Field):
+    def __init__(self, value):
+        if not self.is_valid_phone(value):
+            raise ValueError("Invalid phone number format")
+        super().__init__(value)
+
+    def is_valid_phone(self, phone):
+    
+        return bool(re.match(r'^[\d-]+$', phone))
+
+class Record:
+    def __init__(self, name):
+        self.name = Name(name)
+        self.phones = []
+
+    def add_phone(self, phone):
+        self.phones.append(Phone(phone))
+
+    def remove_phone(self, phone):
+        self.phones = [p for p in self.phones if p.value != phone]
+
+    def edit_phone(self, old_phone, new_phone):
+        for p in self.phones:
+            if p.value == old_phone:
+                p.value = new_phone
+
+    def find_phone(self, phone):
+        for p in self.phones:
+            if p.value == phone:
+                return p
+        return None
+
+class AddressBook:
+    def __init__(self):
+        self.data = {}
+
+    def add_record(self, record):
+        self.data[record.name.value] = record
+
+    def find(self, name):
+        return self.data.get(name, None)
+
+    def delete(self, name):
+        if name in self.data:
+            del self.data[name]
+
+try:
+    invalid_phone = Phone("123-456-78A9")
+except ValueError as e:
+    print(f"Error: {e}")
+
+
+valid_phone = Phone("123-456-7890")
+
+my_record = Record(name="John Doe")
+my_record.add_phone("123-456-7890")
+
+found_phone = my_record.find_phone("123-456-7890")
+print(f"Found phone: {found_phone.value if found_phone else 'Not found'}")
+
+my_address_book = AddressBook()
+
+my_address_book.add_record(my_record)
+
+found_record = my_address_book.find("John Doe")
+print(f"Found record: {found_record.name.value if found_record else 'Not found'}")
+
+my_address_book.delete("John Doe")
+
+found_record_after_delete = my_address_book.find("John Doe")
+print(f"Record after delete: {found_record_after_delete.name.value if found_record_after_delete else 'Not found'}")
